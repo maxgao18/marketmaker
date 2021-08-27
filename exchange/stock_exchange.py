@@ -1,5 +1,5 @@
 from order_book import OrderBook
-from order_types import Cancel, CancelAll, Limit, Market
+from order_types import Cancel, CancelAll, Limit, Market, Side
 
 
 class StockExchange:
@@ -43,7 +43,7 @@ class StockExchange:
 
 
 if __name__ == "__main__":
-    ex = Exchange(["BABA"])
+    ex = StockExchange(["BABA"])
     print(
         ex.submit(Limit(user="u1", px=1.00, qty=2, side=Side.BUY, id=1, symbol="BABA"))
     )

@@ -19,9 +19,12 @@ class ScreenState:
         self.symbol = symbol
 
     def update(self, book, levels=21, px_inc=0.01, hist_len=15):
+        px_inc_inv = 1 / px_inc
         for k, v in book.items():
             nm = {}
-            nm = {float(px): int(qty) for px, qty in v.items()}
+            nm = {
+                int(float(px) * px_inc_inv) * px_inc: int(qty) for px, qty in v.items()
+            }
             book[k] = nm
 
         bids = sorted(book["bids"].items(), reverse=True)
@@ -77,9 +80,9 @@ def _write_book_to_screen(
     else:
         mid_px = int(inverse_px_inc * (best_bid + best_ask) / 2) * px_inc
     lowest_px = mid_px - int(levels / 2) * px_inc
-    highest_px = mid_px + int(levels / 2 + 1) * px_inc
+    highest_px = lowest_px + (levels - 1) * px_inc
 
-    px_range = np.arange(lowest_px, highest_px + px_inc, px_inc)
+    px_range = [lowest_px + i * px_inc for i in range(levels)]
 
     px_decimals = max(1, len(f"{int(highest_px)}"), len(f"{int(lowest_px)}"))
 
@@ -117,7 +120,7 @@ def _write_book_to_screen(
         # print(_format_level(px, px_decimals, orders))
         screen.print_at(
             _format_level(px, px_decimals, orders),
-            _ASCII_X_START + hist_len + 2,
+            _ASCII_X_START + hist_len,
             y + _ASCII_Y_START,
             color,
         )
@@ -126,7 +129,7 @@ def _write_book_to_screen(
         dx = hist_len - len(bid_hist)
         if px is None:
             continue
-        dy = int((highest_px - px) / px_inc) + 1
+        dy = int((highest_px - px) / px_inc)
         if dy > levels or dy < 0:
             continue
         screen.print_at("X", _ASCII_X_START + idx + dx, _ASCII_Y_START + dy, BUY_COLOR)
@@ -134,7 +137,7 @@ def _write_book_to_screen(
         dx = hist_len - len(bid_hist)
         if px is None:
             continue
-        dy = int((highest_px - px) / px_inc) + 1
+        dy = int((highest_px - px) / px_inc)
         if dy > levels or dy < 0:
             continue
         screen.print_at("X", _ASCII_X_START + idx + dx, _ASCII_Y_START + dy, SELL_COLOR)

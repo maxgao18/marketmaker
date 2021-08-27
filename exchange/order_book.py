@@ -55,6 +55,7 @@ class OrderBook:
                     "id": order.id,
                     "user": order.user,
                     "order_id": order.order_id,
+                    "type": "CANCEL",
                     "status": "FAILED",
                 }
             ]
@@ -82,7 +83,8 @@ class OrderBook:
                 "id": order.id,
                 "user": order.user,
                 "order_id": order.order_id,
-                "status": "CANCEL",
+                "type": "CANCEL",
+                "status": "FILLED",
                 "qty": canceled_order.qty,
                 "px": canceled_order.px,
                 "side": side,
@@ -100,7 +102,8 @@ class OrderBook:
                             "id": order.id,
                             "user": user,
                             "order_id": o.id,
-                            "status": "CANCEL",
+                            "type": "CANCEL",
+                            "status": "FILLED",
                             "qty": o.qty,
                             "px": o.px,
                             "side": side,
@@ -160,7 +163,8 @@ class OrderBook:
                     "px": top_order.px,
                     "qty": qty,
                     "side": match_side,
-                    "status": "COMPLETE" if new_top_order.qty == 0 else "PARTIAL",
+                    "type": "TRADE",
+                    "status": "FILLED" if new_top_order.qty == 0 else "PARTIAL",
                 }
             )
             if new_top_order.qty > 0:
@@ -177,7 +181,8 @@ class OrderBook:
                     "px": total_px / qty,
                     "qty": qty,
                     "side": order_side,
-                    "status": "COMPLETE" if order.qty == 0 else "PARTIAL",
+                    "type": "TRADE",
+                    "status": "FILLED" if order.qty == 0 else "PARTIAL",
                 }
             )
 
@@ -196,6 +201,17 @@ class OrderBook:
                     ),
                 )
                 self.uids.add(order.uid)
+                executions.append(
+                    {
+                        "id": order.id,
+                        "user": order.user,
+                        "px": order.px,
+                        "qty": order.qty,
+                        "side": order_side,
+                        "type": "ADD",
+                        "status": "FILLED",
+                    }
+                )
             else:
                 failed.append(
                     {
@@ -203,6 +219,7 @@ class OrderBook:
                         "user": order.user,
                         "qty": order.qty,
                         "side": order_side,
+                        "type": "TRADE",
                         "status": "FAILED",
                     }
                 )

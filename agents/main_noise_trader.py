@@ -7,6 +7,8 @@ import signal
 ctr = 0
 interrupted = False
 
+sleeptime_sec = 1
+
 
 def signal_handler(signum, frame):
     global interrupted
@@ -78,10 +80,10 @@ while not interrupted:
     while not interrupted:
         try:
             message = psocket.recv(zmq.NOBLOCK)
-            print(message, flush=True)
+            # print(message, flush=True)
         except zmq.ZMQError:
             break
-    px = random.randint(99, 110) / 100
+    px = random.randint(50, 100) / 100
     qty = random.randint(1, 10)
     side = random.randint(0, 1)
     if side == 0:
@@ -96,4 +98,4 @@ while not interrupted:
             break
         except zmq.ZMQError:
             continue
-    time.sleep(3)
+    time.sleep(sleeptime_sec)
