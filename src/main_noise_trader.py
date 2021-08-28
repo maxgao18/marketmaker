@@ -18,7 +18,7 @@ def signal_handler(signum, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-trader = NoiseTrader(user="nt-1", arrival_rate=1, stock=STOCK, sides=[Side.BUY])
+trader = NoiseTrader(user="nt-1", arrival_rate=3, stock=STOCK)
 loop = TradeLoop(trader=trader)
 
 loop.run()

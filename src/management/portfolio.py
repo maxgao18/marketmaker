@@ -57,7 +57,7 @@ class Portfolio:
         if prev_holdings * book_qty >= 0:
             self._book_value[symbol] += book_qty * px
         elif abs(prev_holdings) >= qty:
-            self._book_value[symbol] *= qty / prev_holdings
+            self._book_value[symbol] *= 1 - qty / abs(prev_holdings)
         else:
             self._book_value[symbol] = self._holdings[symbol] * px
 

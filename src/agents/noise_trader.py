@@ -32,7 +32,7 @@ class NoiseTrader(Trader):
             print("================================")
             print(f"holding - {state.portfolio.holdings()}")
             print(f"bv - {state.portfolio.book_values()}")
-            print(f"pv - {sum(state.portfolio.book_values().values())}")
+            print(f"pv - {sum(state.portfolio.book_values().values())}", flush=True)
             px = random.randint(50, 100) / 100
             qty = random.randint(1, 10)
             side = random.choice(self._sides)

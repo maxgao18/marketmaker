@@ -47,7 +47,7 @@ class TradeLoop:
             while True:
                 try:
                     message = psocket.recv(zmq.NOBLOCK)
-                    print(message, flush=True)
+                    # print(message, flush=True)
 
                     topic, body = message.split(b" ", 1)
                     msg_type, symbol = split_topic(topic)

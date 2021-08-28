@@ -11,7 +11,7 @@ def event_topic(stock):
 
 def split_topic(topic):
     if isinstance(topic, bytes):
-        topic = str(topic)
+        topic = topic.decode("utf-8")
     return topic.split("::", 1)
 
 

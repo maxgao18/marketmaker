@@ -15,9 +15,9 @@ class TradeHistory:
         total_trade_amt = defaultdict(lambda: 0)
         total_trade_qty = defaultdict(lambda: 0)
 
-        for event in events:
+        for event in events["executed"]:
             if event["type"] == "TRADE":
-                stock = event["stock"]
+                stock = event["symbol"]
                 total_trade_amt[stock] += float(event["px"]) * int(event["qty"])
                 total_trade_qty[stock] += int(event["qty"])
         for s, amt in total_trade_amt.items():
@@ -36,8 +36,8 @@ class TradeHistory:
 
     def last_trade_px(self, symbol):
         pxs = self._last_trade_prices.get(symbol)
-        return pxs[0] if len(pxs) > 0 else None
+        return pxs[0] if pxs is not None and len(pxs) > 0 else None
 
     def last_trade_volume(self, symbol):
         amts = self._last_trade_volumes.get(symbol)
-        return amts[0] if len(amts) > 0 else None
+        return amts[0] if amts is not None and len(amts) > 0 else None
