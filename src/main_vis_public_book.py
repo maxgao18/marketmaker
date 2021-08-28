@@ -14,8 +14,7 @@ STOCK = "BABA"
 
 
 def signal_handler(signum, frame):
-    global interrupted
-    interrupted = True
+    exit(1)
 
 
 signal.signal(signal.SIGINT, signal_handler)

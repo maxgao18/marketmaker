@@ -1,7 +1,3 @@
-import zmq
-import json
-import random
-import time
 import signal
 
 from agents.noise_trader import NoiseTrader
