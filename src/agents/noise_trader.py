@@ -30,7 +30,7 @@ class NoiseTrader(Trader):
     def run(self, state):
         ts = time.time()
         if self._next_submit < ts:
-            print("================================")
+            print(f"================================{self.user}")
             print(f"holding - {state.portfolio.holdings()}")
             print(f"bv - {state.portfolio.book_values()}")
             print(f"pv - {sum(state.portfolio.book_values().values())}", flush=True)

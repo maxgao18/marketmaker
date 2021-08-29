@@ -45,13 +45,15 @@ class MarketMaker(Trader):
         self._half_spread = half_spread
         self._stock = stock
 
-        self._stock_theo = 1
+        self._stock_theo = None
         self._last_timestamp = 0
 
         self._last_refresh = 0
         self._refresh_period = 4
 
         self._last_print = 0
+
+        self._bv = 0
 
     def callback_options(self):
         return Trader.CallBackOptions(always_run=False, on_event=True)
@@ -101,15 +103,14 @@ class MarketMaker(Trader):
             ask_qty = self._max_position + stock_position - out_ask_qty
 
             if ts - self._last_print > 0.5:
-                print("================================")
+                print(f"================================ {self.user}")
                 print(f"holding - {state.portfolio.holdings()}")
                 print(f"bv - {state.portfolio.book_values()}")
                 print(f"pv - {sum(state.portfolio.book_values().values())}", flush=True)
                 print(f"theo - {new_theo}")
                 print(f"ba {bid_px} - {ask_px}", flush=True)
-                print(outstanding_orders)
-                print(in_flight_orders)
                 self._last_print = ts
+                self._bv = sum(state.portfolio.book_values().values())
 
             if bid_qty > 0:
                 self.submit_to_exchange(

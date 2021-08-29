@@ -92,8 +92,10 @@ class Portfolio:
             self._book_value[symbol] = self._holdings[symbol] * px
 
         self._holdings[_CASH] -= book_qty * px
+        self._book_value[_CASH] = self._holdings[_CASH]
         if self._holdings[symbol] == 0 and symbol != _CASH:
             self._holdings.pop(symbol, None)
+            self._book_value.pop(symbol, None)
 
         order_id = event["id"]
         status = event["status"]

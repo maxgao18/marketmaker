@@ -11,7 +11,7 @@ from visualizations.order_book.ascii_gui import ScreenState
 interrupted = False
 
 STOCK = "BABA"
-MAX_FPS = 0
+MAX_FPS = 4
 
 period = 0 if MAX_FPS == 0 else 1 / MAX_FPS
 
