@@ -28,8 +28,9 @@ def plt_pnl(mm, ax):
       ts.append(int(time.time()))
 
       ax.clear()
-      ax.set_ylabel("pnl")
-      ax.set_xlabel("timestamp")
+      ax.set_title("Market Maker P/L")
+      ax.set_ylabel("P/L")
+      ax.set_xlabel("Timestamp")
       ax.plot(ts, pnls)
 
     return update_plot
