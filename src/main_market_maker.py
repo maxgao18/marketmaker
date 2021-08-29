@@ -1,6 +1,6 @@
 import signal
 
-from agents.noise_trader import NoiseTrader
+from agents.market_maker import MarketMaker
 from utils.trade_loop import TradeLoop
 from utils.trade import Side
 
@@ -14,7 +14,7 @@ def signal_handler(signum, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-trader = NoiseTrader(user="nt-m-1", arrival_rate=3, stock=STOCK, use_market=True)
+trader = MarketMaker(user="mm-1", max_position=50, half_spread=0.03, stock=STOCK)
 loop = TradeLoop(trader=trader)
 
 loop.run()

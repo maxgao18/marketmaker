@@ -119,7 +119,7 @@ def _write_book_to_screen(
         if px is None:
             continue
         dy = int(np.round((highest_px - px) / px_inc))
-        if dy > levels or dy < 0:
+        if dy >= levels or dy < 0:
             continue
         screen.print_at("X", _ASCII_X_START + idx + dx, _ASCII_Y_START + dy, BUY_COLOR)
     for idx, px in enumerate(ask_hist):
@@ -127,7 +127,7 @@ def _write_book_to_screen(
         if px is None:
             continue
         dy = int(np.round((highest_px - px) / px_inc))
-        if dy > levels or dy < 0:
+        if dy >= levels or dy < 0:
             continue
         screen.print_at("X", _ASCII_X_START + idx + dx, _ASCII_Y_START + dy, SELL_COLOR)
     screen.refresh()

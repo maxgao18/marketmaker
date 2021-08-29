@@ -129,7 +129,12 @@ class OrderBook:
         return canceled, []
 
     def _exec_stock_order(self, order):
-        order_px = 1 << 30 if isinstance(order, Market) else order.px
+        if isinstance(order, Market):
+            order_px = 1 << 30
+            if order.side == Side.SELL:
+                order_px *= -1
+        else:
+            order_px = order.px
         if order.side == Side.BUY:
             order_book = self.buy_side
             match_book = self.sell_side

@@ -30,8 +30,11 @@ class Trader(ABC):
         self.msg_id += 1
         if msg is not None:
             msg["user"] = self.user
-            msg["id"] = self.msg_id
-            state.exchange.submit(msg)
+            msg["id"] = str(self.msg_id)
         elif func is not None:
             msg = func(user=self.user, id=self.msg_id, **kwargs)
-            state.exchange.submit(msg)
+        else:
+            return
+
+        state.portfolio.process_new_order(msg)
+        state.exchange.submit(msg)

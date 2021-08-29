@@ -7,13 +7,20 @@ class Side(str, Enum):
 
 
 def market(user, id, symbol, qty, side):
-    return {"user": user, "id": id, "symbol": symbol, "qty": qty, "side": side}
+    return {
+        "user": user,
+        "id": str(id),
+        "symbol": symbol,
+        "qty": qty,
+        "side": side,
+        "type": "MARKET",
+    }
 
 
 def cancel(user, id, order_id, symbol):
     return {
         "user": user,
-        "id": id,
+        "id": str(id),
         "order_id": order_id,
         "symbol": symbol,
         "type": "CANCEL",
@@ -23,7 +30,7 @@ def cancel(user, id, order_id, symbol):
 def limit(user, id, symbol, px, qty, side):
     return {
         "user": user,
-        "id": id,
+        "id": str(id),
         "symbol": symbol,
         "side": side,
         "qty": qty,
@@ -35,7 +42,7 @@ def limit(user, id, symbol, px, qty, side):
 def cancel_all(user, id, symbol="*"):
     return {
         "user": user,
-        "id": id,
+        "id": str(id),
         "symbol": symbol,
         "type": "CANCELALL",
     }

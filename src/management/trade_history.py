@@ -34,6 +34,15 @@ class TradeHistory:
                 qtys.popleft()
                 pxs.popleft()
 
+    def last_trade_pxs(self, symbol):
+        return self._last_trade_prices[symbol]
+
+    def last_trade_tss(self, symbol):
+        return self._last_trade_ts[symbol]
+
+    def last_trade_volumes(self, symbol):
+        return self._last_trade_volumes[symbol]
+
     def last_trade_px(self, symbol):
         pxs = self._last_trade_prices.get(symbol)
         return pxs[0] if pxs is not None and len(pxs) > 0 else None
