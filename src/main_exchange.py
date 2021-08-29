@@ -5,6 +5,8 @@ import zmq
 import signal
 import traceback
 
+import numpy as np
+
 from exchange.stock_exchange import StockExchange
 from exchange.order_types import Cancel, CancelAll, Limit, Market, Side
 
@@ -31,7 +33,6 @@ def parse_side(side):
 
 def parse_message(msg):
     try:
-        msg = json.loads(msg)
         user = msg["user"]
         order_type = msg["type"]
         o_id = msg["id"]
@@ -48,7 +49,8 @@ def parse_message(msg):
                 )
         elif order_type == "LIMIT":
             side = parse_side(msg["side"])
-            if side is not None:
+            px = float(msg["px"])
+            if np.round(px, decimals=2) == px and side is not None:
                 return Limit(
                     user=user,
                     qty=int(msg["qty"]),
@@ -86,12 +88,19 @@ def run_exchange(symbol, server_sock, pub_sock):
             continue
 
         try:
-            order = parse_message(message)
+            loaded = json.loads(message)
+            order = parse_message(loaded)
             if order is None:
-                continue
+                events = {
+                    "executed": [],
+                    "failed": [loaded],
+                }
+                sym = loaded.get("symbol", "?")
+                psocket.send_string(
+                    f"{_EVENT_TOPIC_FORMAT.format(sym)} {json.dumps(events)}"
+                )
 
             s, f = ex.submit(order)
-
             if order.symbol == "*":
                 s_symbol = defaultdict(list)
                 f_symbol = defaultdict(list)

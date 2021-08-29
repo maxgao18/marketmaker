@@ -48,13 +48,18 @@ def _write_book_to_screen(
         spcs = "." * (o - len(sz))
         return f"{sz}{spcs}"
 
+    def _format_size(orders):
+        tot = f"{sum(orders)}" if orders is not None else "0"
+        spcs = " " * (4 - len(tot))
+        return f"{tot}{spcs}"
+
     def _format_level(px, px_decimals, orders):
         px = f"{px:.2f}"
         spcs = " " * (px_decimals - len(px) + 3)
         orderstr = (
             "".join(_format_order(o) for o in orders) if orders is not None else ""
         )
-        return f"| {spcs}{px} | {orderstr}"
+        return f"| {spcs}{px} | {_format_size(orders)} | {orderstr}"
 
     inverse_px_inc = 1 / px_inc
     screen.clear()
@@ -100,10 +105,10 @@ def _write_book_to_screen(
         orders = None
         if px in asks:
             color = SELL_COLOR
-            orders = [asks[px]]
+            orders = asks[px]
         elif px in bids:
             color = BUY_COLOR
-            orders = [bids[px]]
+            orders = bids[px]
 
         # print(orders)
         # print(_format_level(px, px_decimals, orders))

@@ -39,11 +39,14 @@ def _recalculate_theo(c_theo, trade_hist, since_ts, symbol, volume_scale=20):
 
 
 class MarketMaker(Trader):
-    def __init__(self, max_position, stock, half_spread=0.05, **kwargs):
+    def __init__(
+        self, max_position, stock, half_spread=0.05, skew_quotes=False, **kwargs
+    ):
         super().__init__(**kwargs)
         self._max_position = max_position
         self._half_spread = half_spread
         self._stock = stock
+        self._skew_quotes = skew_quotes
 
         self._stock_theo = None
         self._last_timestamp = 0
@@ -52,8 +55,6 @@ class MarketMaker(Trader):
         self._refresh_period = 4
 
         self._last_print = 0
-
-        self._bv = 0
 
     def callback_options(self):
         return Trader.CallBackOptions(always_run=False, on_event=True)
@@ -92,10 +93,14 @@ class MarketMaker(Trader):
                             out_bid_qty += o["qty"]
                         else:
                             out_ask_qty += o["qty"]
+
             additional_ask_edge = (
-                -stock_position / self._max_position * self._half_spread
+                (-stock_position / self._max_position * self._half_spread)
+                if self._skew_quotes
+                else 0
             )
-            additional_bid_edge = -additional_ask_edge
+            additional_bid_edge = -additional_ask_edge if self._skew_quotes else 0
+
             bid_px = np.round(new_theo - self._half_spread - additional_bid_edge, 2)
             ask_px = np.round(new_theo + self._half_spread + additional_ask_edge, 2)
 
@@ -106,11 +111,10 @@ class MarketMaker(Trader):
                 print(f"================================ {self.user}")
                 print(f"holding - {state.portfolio.holdings()}")
                 print(f"bv - {state.portfolio.book_values()}")
-                print(f"pv - {sum(state.portfolio.book_values().values())}", flush=True)
                 print(f"theo - {new_theo}")
                 print(f"ba {bid_px} - {ask_px}", flush=True)
+                print(f"profit - ({self.realized_pnl:.2f})", flush=True)
                 self._last_print = ts
-                self._bv = sum(state.portfolio.book_values().values())
 
             if bid_qty > 0:
                 self.submit_to_exchange(

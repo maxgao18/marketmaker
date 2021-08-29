@@ -70,4 +70,4 @@ class TradeLoop:
             if callback_options.always_run or (
                 saw_exchange_message and callback_options.on_event
             ):
-                self.trader.run(state)
+                self.trader.trade_loop(state)

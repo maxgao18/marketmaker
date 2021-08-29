@@ -39,13 +39,13 @@ class OrderBook:
         raise UnknownOrderException(f"Unknown order {order}")
 
     def dump(self, max_levels=-1):
-        bids = defaultdict(lambda: 0)
-        asks = defaultdict(lambda: 0)
+        bids = defaultdict(list)
+        asks = defaultdict(list)
 
         for b in self.buy_side:
-            bids[b.px] += b.qty
+            bids[b.px].append(b.qty)
         for a in self.sell_side:
-            asks[a.px] += a.qty
+            asks[a.px].append(a.qty)
 
         if max_levels > 0:
             highest_bids = list(sorted(bids.keys()))[-max_levels:]

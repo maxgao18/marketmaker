@@ -18,7 +18,7 @@ def split_topic(topic):
 def parse_book_str(book_str):
     book = json.loads(book_str)
     for k, v in book.items():
-        book[k] = {float(px): int(qty) for px, qty in v.items()}
+        book[k] = {float(px): qtys for px, qtys in v.items()}
     return book
 
 

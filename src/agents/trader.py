@@ -11,6 +11,10 @@ class Trader(ABC):
         self.user = user
         self.msg_id = 0
 
+        self.book_value = 0
+        self.realized_pnl = 0
+        self.unrealized_pnl = 0
+
     def callback_options(self):
         return Trader.CallBackOptions()
 
@@ -26,6 +30,10 @@ class Trader(ABC):
     def run(self, state):
         pass
 
+    def trade_loop(self, state):
+        self.set_pnls(state)
+        self.run(state)
+
     def submit_to_exchange(self, state, msg=None, func=None, **kwargs):
         self.msg_id += 1
         if msg is not None:
@@ -38,3 +46,7 @@ class Trader(ABC):
 
         state.portfolio.process_new_order(msg)
         state.exchange.submit(msg)
+
+    def set_pnls(self, state):
+        self.book_value = sum(state.portfolio.book_values().values())
+        self.realized_pnl = self.book_value - state.portfolio.initial_capital

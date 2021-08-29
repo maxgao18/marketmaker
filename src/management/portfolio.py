@@ -12,7 +12,7 @@ _IN_FLIGHT_SEC_THRESHOLD = 2
 class Portfolio:
     def __init__(self, user, initial_capital=0):
         self._user = user
-        self._initial_capital = initial_capital
+        self.initial_capital = initial_capital
 
         self._holdings = defaultdict(lambda: 0)
         self._holdings[_CASH] = initial_capital
