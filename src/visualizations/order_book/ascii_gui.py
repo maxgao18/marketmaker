@@ -4,7 +4,7 @@ from collections import defaultdict, deque
 import asciimatics.constants as asciiconsts
 import numpy as np
 
-from management.order_book import best_ask, best_bid
+from management.order_book import _best_ask, _best_bid
 
 SELL_COLOR = asciiconsts.COLOUR_RED
 BUY_COLOR = asciiconsts.COLOUR_BLUE
@@ -20,8 +20,8 @@ class ScreenState:
         self.symbol = symbol
 
     def update(self, book, levels=21, px_inc=0.01, hist_len=15):
-        self.best_bids.append(best_bid(book))
-        self.best_asks.append(best_ask(book))
+        self.best_bids.append(_best_bid(book))
+        self.best_asks.append(_best_ask(book))
 
         if len(self.best_bids) > hist_len:
             self.best_bids.popleft()

@@ -99,6 +99,7 @@ def run_exchange(symbol, server_sock, pub_sock):
                 psocket.send_string(
                     f"{_EVENT_TOPIC_FORMAT.format(sym)} {json.dumps(events)}"
                 )
+                continue
 
             s, f = ex.submit(order)
             if order.symbol == "*":

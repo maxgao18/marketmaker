@@ -1,4 +1,4 @@
-from agents.noise_trader import NoiseTrader
+from agents.hodler import HODLer
 from utils.trade_loop import TradeLoop
 from utils.trade import Side
 from run_trader import run_trader
@@ -6,14 +6,14 @@ from run_trader import run_trader
 
 STOCK = "BABA"
 
-trader = NoiseTrader(
-    user="mkt-odr",
+trader = HODLer(
+    user="hodl",
     arrival_rate=3,
     stock=STOCK,
     qty_mean=10,
     qty_stddev=5,
-    use_market=True,
+    capital_per_trade=10,
 )
-loop = TradeLoop(trader)
+loop = TradeLoop(trader=trader)
 
 run_trader(loop)

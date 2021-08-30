@@ -59,6 +59,7 @@ class NoiseTrader(Trader):
                 else np.random.normal(0.5, 0.1)
             )
             px = max(0.01, np.round(random_px, decimals=2))
+            print(f"mpx {mid_px} rpx {px}")
             qty = max(
                 self._qty_min,
                 min(
@@ -72,7 +73,6 @@ class NoiseTrader(Trader):
                 self.submit_to_exchange(
                     state, func=market, qty=qty, side=side, symbol=self._stock
                 )
-                print(state.portfolio.in_flight_orders(self._stock))
             else:
                 self.submit_to_exchange(
                     state, func=limit, px=px, qty=qty, side=side, symbol=self._stock

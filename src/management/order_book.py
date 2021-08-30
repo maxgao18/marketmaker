@@ -42,3 +42,15 @@ class OrderBooks:
 
     def book(self, symbol):
         return self._books.get(symbol)
+
+    def qty_at(self, symbol, px):
+        book = self._books.get(symbol)
+        if book is None:
+            return 0
+        bids = book["bids"]
+        asks = book["asks"]
+        if px in bids:
+            return sum(bids[px])
+        elif px in asks:
+            return sum(asks[px])
+        return 0
