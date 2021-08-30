@@ -36,7 +36,7 @@ A HODLer buys in one direction without the intention of selling (or vice versa).
 
 ## Informed Traders
 
-An informed trader knows the theoretical value of an asset. If the bid is above the theoretical, they will likely sell, and if the ask is below the theoretical, they will likely buy. Informed traders can use either market or limit orders. The quantity increases linearly with respect to the trades EV (i.e. `abs[theo-(bid-or-ask)]`).
+An informed trader knows the theoretical value of an asset. If the bid is above the theoretical, they will likely sell, and if the ask is below the theoretical, they will likely buy. Informed traders can use either market or limit orders. The quantity increases linearly with respect to the trades EV (i.e. `max(bid-theo, theo-ask)`).
 
 ## Market Makers
 
