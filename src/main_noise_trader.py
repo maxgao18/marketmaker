@@ -12,7 +12,7 @@ trader = NoiseTrader(
     stock=STOCK,
     qty_mean=10,
     qty_stddev=5,
-    use_market=True,
+    use_market=False,
 )
 loop = TradeLoop(trader)
 

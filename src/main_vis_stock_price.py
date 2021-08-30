@@ -16,10 +16,11 @@ interrupted = False
 STOCK = "BABA"
 
 CHART_UPDATE_MS = 1000
+HISTORY_LEN_SEC = 10000
 
 
 class PriceHistory:
-    def __init__(self, history_len_sec=30):
+    def __init__(self, history_len_sec=10000):
         self._lock = threading.Lock()
         self._last_trade_prices = deque()
         self._last_trade_ts = deque()
@@ -57,8 +58,9 @@ def updater_func(ax, pxhistory):
         px, ts = pxhistory.get_history()
 
         ax.clear()
-        ax.set_ylabel("px")
-        ax.set_xlabel("timestamp")
+        ax.set_title(f"Last Trade Price for {STOCK}")
+        ax.set_ylabel("Price")
+        ax.set_xlabel("Timestamp")
         ax.plot(ts, px)
 
     return update_plot
@@ -93,7 +95,7 @@ psocket.subscribe(event_topic(STOCK))
 
 fig = plt.figure()
 ax1 = fig.add_subplot(1, 1, 1)
-pxhistory = PriceHistory()
+pxhistory = PriceHistory(history_len_sec=HISTORY_LEN_SEC)
 
 th = threading.Thread(
     target=event_handler,
@@ -102,6 +104,7 @@ th = threading.Thread(
         pxhistory,
     ),
 )
+th.setDaemon(True)
 th.start()
 
 ani = animation.FuncAnimation(
