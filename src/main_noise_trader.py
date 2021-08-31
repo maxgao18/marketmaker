@@ -7,7 +7,7 @@ from run_trader import run_trader
 STOCK = "BABA"
 
 trader = NoiseTrader(
-    user="mkt-odr",
+    user="limit-odr",
     arrival_rate=6,
     stock=STOCK,
     qty_mean=10,

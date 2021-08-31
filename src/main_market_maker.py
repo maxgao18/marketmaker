@@ -8,12 +8,12 @@ STOCK = "BABA"
 PLOT_PNL = True
 
 trader = MarketMaker(
-    user="mm-no-vpin",
+    user="mm-vpin-skew",
     max_position=50,
     half_spread=0.01,
     vpin_multiplier=0.3,
     stock=STOCK,
-    skew_quotes=False,
+    skew_quotes=True,
 )
 loop = TradeLoop(trader=trader)
 
