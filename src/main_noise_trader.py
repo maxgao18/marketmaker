@@ -1,6 +1,6 @@
 from agents.noise_trader import NoiseTrader
 from utils.trade_loop import TradeLoop
-from utils.trade import Side
+from utils.exchange_messages import Side
 from run_trader import run_trader
 
 

@@ -4,7 +4,7 @@ import random
 import numpy as np
 
 from agents.trader import Trader
-from utils.trade import cancel_all, cancel, market, limit, Side
+from utils.exchange_messages import cancel_all, cancel, market, limit, Side
 
 
 class HODLer(Trader):
@@ -50,8 +50,11 @@ class HODLer(Trader):
         if self._next_submit < ts:
             print(f"================================{self.user}")
             print(f"holdings - {state.portfolio.holdings()}")
-            print(f"bv - {self.book_value}")
-            print(f"pnl - {self.realized_pnl}", flush=True)
+            print(f"bv - {self.book_value:.2f}")
+            print(
+                f"pnl - net ({self.realized_pnl+self.unrealized_pnl:.2f}) real ({self.realized_pnl:.2f})",
+                flush=True,
+            )
             mid_px = state.order_books.mid_px(self._stock)
             if (
                 self._px_threshold is None

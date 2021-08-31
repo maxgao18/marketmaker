@@ -4,7 +4,8 @@ import random
 import numpy as np
 
 from agents.trader import Trader
-from utils.trade import cancel_all, cancel, market, limit, Side
+from utils.exchange_messages import cancel_all, cancel, market, limit, Side
+from management.order_manager import filter_order_ids
 
 
 class NoiseTrader(Trader):
@@ -49,20 +50,12 @@ class NoiseTrader(Trader):
     def run(self, state):
         ts = time.time()
 
-        old_orders = [
-            id
-            for id, o in state.portfolio.outstanding_orders(self._stock).items()
-            if ts - o["recv_time"] > self._cancel_old_orders_beyond_sec
-        ]
-        in_flight_cancels = []
-        for o in state.portfolio.in_flight_orders(self._stock).values():
-            otype = o["type"]
-            if otype == "CANCEL":
-                in_flight_cancels.append(o["order_id"])
-            elif otype == "CANCELALL" and isinstance(o["order_ids"], list):
-                in_flight_cancels += o["order_ids"]
-
-        to_cancel = set(old_orders).difference(in_flight_cancels)
+        to_cancel = filter_order_ids(
+            self._stock,
+            state,
+            timestamp_filter_func=lambda order_ts: order_ts
+            < ts - self._cancel_old_orders_beyond_sec,
+        )
         if len(to_cancel) > 0:
             self.submit_to_exchange(
                 state, func=cancel_all, order_ids=list(to_cancel), symbol=self._stock
@@ -71,8 +64,11 @@ class NoiseTrader(Trader):
         if self._next_submit < ts:
             print(f"================================{self.user}")
             print(f"holdings - {state.portfolio.holdings()}")
-            print(f"bv - {self.book_value}")
-            print(f"pnl - {self.realized_pnl}", flush=True)
+            print(f"bv - {self.book_value:.2f}")
+            print(
+                f"pnl - net ({self.realized_pnl+self.unrealized_pnl:.2f}) real ({self.realized_pnl:.2f})",
+                flush=True,
+            )
             mid_px = state.order_books.mid_px(self._stock)
             random_px = (
                 np.random.normal(loc=mid_px, scale=self._px_stddev)

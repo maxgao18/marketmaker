@@ -8,7 +8,7 @@ from threading import Thread, Timer
 
 from agents.market_maker import MarketMaker
 from utils.trade_loop import TradeLoop
-from utils.trade import Side
+from utils.exchange_messages import Side
 from visualizations.trader.pnl import plt_pnl
 
 import matplotlib.pyplot as plt

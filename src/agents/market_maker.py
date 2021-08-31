@@ -4,7 +4,8 @@ import random
 import numpy as np
 
 from agents.trader import Trader
-from utils.trade import cancel_all, cancel, market, limit, Side
+from management.order_manager import filter_order_ids
+from utils.exchange_messages import cancel_all, cancel, market, limit, Side
 from signals.trade_direction import TradeDirection
 from signals.vpin import VPIN
 
@@ -28,6 +29,9 @@ def _recalculate_theo(c_theo, trade_hist, since_ts, symbol, volume_scale=20):
         c_theo += min(1, volumes[i] / volume_scale) * diff
 
     return c_theo
+
+
+_CANCEL_ORDER_TYPES = set("ADD")
 
 
 class MarketMaker(Trader):
@@ -57,6 +61,7 @@ class MarketMaker(Trader):
 
         self._trade_direction = TradeDirection(history_len_sec=30)
         self._vpin = VPIN(self._trade_direction)
+        self._px_error_threshold = 0.01
 
         self.add_signal([self._trade_direction, self._vpin])
 
@@ -81,12 +86,12 @@ class MarketMaker(Trader):
         in_flight_orders = state.portfolio.in_flight_orders(self._stock)
         stock_position = state.portfolio.holding(self._stock)
 
-        if (self._stock_theo is not None and abs(new_theo - self._stock_theo)) or (
-            ts - self._last_refresh > self._refresh_period
-        ):
-            self.submit_to_exchange(state, func=cancel_all, symbol=self._stock)
-            self._last_refresh = ts
-        elif new_theo is not None:
+        # if (self._stock_theo is not None and abs(new_theo - self._stock_theo)) or (
+        #     ts - self._last_refresh > self._refresh_period
+        # ):
+        #     self.submit_to_exchange(state, func=cancel_all, symbol=self._stock)
+        #     self._last_refresh = ts
+        if new_theo is not None:
             out_bid_qty = 0
             out_ask_qty = 0
             for lst in [outstanding_orders.values(), in_flight_orders.values()]:
@@ -113,6 +118,22 @@ class MarketMaker(Trader):
 
             bid_px = np.round(new_theo - half_spread_vpin - additional_bid_edge, 2)
             ask_px = np.round(new_theo + half_spread_vpin + additional_ask_edge, 2)
+
+            to_cancel = filter_order_ids(
+                self._stock,
+                state,
+                order_types=_CANCEL_ORDER_TYPES,
+                px_filter_func=lambda order_px: order_px
+                < bid_px - self._px_error_threshold
+                or order_px > ask_px + self._px_error_threshold,
+            )
+            if len(to_cancel) > 0:
+                self.submit_to_exchange(
+                    state,
+                    func=cancel_all,
+                    order_ids=list(to_cancel),
+                    symbol=self._stock,
+                )
 
             bid_qty = self._max_position - stock_position - out_bid_qty
             ask_qty = self._max_position + stock_position - out_ask_qty

@@ -52,6 +52,13 @@ class Trader(ABC):
         self.book_value = sum(state.portfolio.book_values().values())
         self.realized_pnl = self.book_value - state.portfolio.initial_capital
 
+        unrealized_pnl = 0
+        for stock, qty in state.portfolio.holdings().items():
+            mid_px = state.order_books.mid_px(stock)
+            if mid_px is not None:
+                unrealized_pnl += qty * mid_px - state.portfolio.book_value(stock)
+        self.unrealized_pnl = unrealized_pnl
+
     def add_signal(self, signal):
         if isinstance(signal, list):
             self.signals += signal

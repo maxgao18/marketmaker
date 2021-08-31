@@ -1,6 +1,6 @@
 from agents.market_maker import MarketMaker
 from utils.trade_loop import TradeLoop
-from utils.trade import Side
+from utils.exchange_messages import Side
 from run_trader import run_trader
 
 
@@ -10,10 +10,10 @@ PLOT_PNL = True
 trader = MarketMaker(
     user="mm-no-vpin",
     max_position=50,
-    half_spread=0.03,
-    vpin_multiplier=0.0,
+    half_spread=0.01,
+    vpin_multiplier=0.3,
     stock=STOCK,
-    skew_quotes=True,
+    skew_quotes=False,
 )
 loop = TradeLoop(trader=trader)
 

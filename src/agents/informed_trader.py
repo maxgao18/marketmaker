@@ -4,7 +4,7 @@ import random
 import numpy as np
 
 from agents.trader import Trader
-from utils.trade import cancel_all, cancel, market, limit, Side
+from utils.exchange_messages import cancel_all, cancel, market, limit, Side
 
 
 class InformedTrader(Trader):
