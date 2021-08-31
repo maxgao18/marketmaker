@@ -5,26 +5,18 @@ import numpy as np
 
 from agents.trader import Trader
 from utils.trade import cancel_all, cancel, market, limit, Side
+from signals.trade_direction import TradeDirection
+from signals.vpin import VPIN
 
-
-def _idx_of_next_largest_backwards_search(lst, v):
-    if lst is None or len(lst) == 0:
-        return -1
-    if lst[0] > v:
-        return 0
-
-    for i in range(1, len(lst) + 1):
-        if lst[-i] <= v:
-            return len(lst) + 1 - i
-    return -1
+import utils.algorithms as algos
 
 
 def _recalculate_theo(c_theo, trade_hist, since_ts, symbol, volume_scale=20):
-    pxs = trade_hist.last_trade_pxs(symbol)
-    tss = trade_hist.last_trade_tss(symbol)
-    volumes = trade_hist.last_trade_volumes(symbol)
+    pxs = trade_hist.prices(symbol)
+    tss = trade_hist.timestamps(symbol)
+    volumes = trade_hist.volumes(symbol)
 
-    idx = _idx_of_next_largest_backwards_search(tss, since_ts)
+    idx = algos.idx_of_next_largest_backwards_search(tss, since_ts)
     if idx < 0:
         return c_theo
 
@@ -40,13 +32,20 @@ def _recalculate_theo(c_theo, trade_hist, since_ts, symbol, volume_scale=20):
 
 class MarketMaker(Trader):
     def __init__(
-        self, max_position, stock, half_spread=0.05, skew_quotes=False, **kwargs
+        self,
+        max_position,
+        stock,
+        half_spread=0.05,
+        vpin_multiplier=0.1,
+        skew_quotes=False,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self._max_position = max_position
         self._half_spread = half_spread
         self._stock = stock
         self._skew_quotes = skew_quotes
+        self._vpin_multiplier = vpin_multiplier
 
         self._stock_theo = None
         self._last_timestamp = 0
@@ -55,6 +54,11 @@ class MarketMaker(Trader):
         self._refresh_period = 4
 
         self._last_print = 0
+
+        self._trade_direction = TradeDirection(history_len_sec=30)
+        self._vpin = VPIN(self._trade_direction)
+
+        self.add_signal([self._trade_direction, self._vpin])
 
     def callback_options(self):
         return Trader.CallBackOptions(always_run=False, on_event=True)
@@ -70,7 +74,7 @@ class MarketMaker(Trader):
         ts = time.time()
 
         new_theo = _recalculate_theo(
-            self._stock_theo, state.trade_history, self._last_timestamp, self._stock
+            self._stock_theo, self._trade_direction, self._last_timestamp, self._stock
         )
 
         outstanding_orders = state.portfolio.outstanding_orders(self._stock)
@@ -94,26 +98,37 @@ class MarketMaker(Trader):
                         else:
                             out_ask_qty += o["qty"]
 
+            vpin = self._vpin.vpin(self._stock)
+            if vpin is None:
+                vpin = 0
+
+            half_spread_vpin = self._half_spread + vpin * self._vpin_multiplier
+
             additional_ask_edge = (
-                (-stock_position / self._max_position * self._half_spread)
+                (-stock_position / self._max_position * half_spread_vpin)
                 if self._skew_quotes
                 else 0
             )
             additional_bid_edge = -additional_ask_edge if self._skew_quotes else 0
 
-            bid_px = np.round(new_theo - self._half_spread - additional_bid_edge, 2)
-            ask_px = np.round(new_theo + self._half_spread + additional_ask_edge, 2)
+            bid_px = np.round(new_theo - half_spread_vpin - additional_bid_edge, 2)
+            ask_px = np.round(new_theo + half_spread_vpin + additional_ask_edge, 2)
 
             bid_qty = self._max_position - stock_position - out_bid_qty
             ask_qty = self._max_position + stock_position - out_ask_qty
 
             if ts - self._last_print > 0.5:
                 print(f"================================ {self.user}")
+                print(f"vpin {vpin:.4f}")
+                print(
+                    f"inital 1/2 sprd {self._half_spread:.02f}, with vpin {half_spread_vpin:.2f}"
+                )
                 print(f"holding - {state.portfolio.holdings()}")
                 print(f"bv - {state.portfolio.book_values()}")
-                print(f"theo - {new_theo}")
-                print(f"ba {bid_px} - {ask_px}", flush=True)
+                print(f"theo - {new_theo:.4f}")
+                print(f"bid-ask {bid_px} - {ask_px}", flush=True)
                 print(f"profit - ({self.realized_pnl:.2f})", flush=True)
+
                 self._last_print = ts
 
             if bid_qty > 0:
@@ -137,10 +152,3 @@ class MarketMaker(Trader):
 
         self._stock_theo = new_theo
         self._last_timestamp = ts
-
-
-if __name__ == "__main__":
-    print(_idx_of_next_largest_backwards_search([1, 2, 3], 3))
-    print(_idx_of_next_largest_backwards_search([1, 2, 3], 1))
-    print(_idx_of_next_largest_backwards_search([1, 2, 3], 0))
-    print(_idx_of_next_largest_backwards_search([1, 2, 3], 4))

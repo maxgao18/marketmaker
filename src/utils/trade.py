@@ -39,10 +39,11 @@ def limit(user, id, symbol, px, qty, side):
     }
 
 
-def cancel_all(user, id, symbol="*"):
+def cancel_all(user, id, order_ids="*", symbol="*"):
     return {
         "user": user,
         "id": str(id),
         "symbol": symbol,
+        "order_ids": order_ids,
         "type": "CANCELALL",
     }

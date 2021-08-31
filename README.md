@@ -32,7 +32,7 @@ Noise traders trade in a random direction with random order quantities and price
 
 ## HODLer
 
-A HODLer buys in one direction without the intention of selling (or vice versa). HODLers use market orders and the quantities of each order can be configured to follow a normal distribution, or trade some predetermined dollar amount.
+A HODLer buys without the intention of selling (or vice versa). HODLers use market orders and the quantities of each order can be configured to follow a normal distribution, or trade some predetermined dollar amount.
 
 ## Informed Traders
 

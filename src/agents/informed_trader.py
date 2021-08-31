@@ -43,9 +43,7 @@ class InformedTrader(Trader):
     def run(self, state):
         ts = time.time()
         if self._next_submit < ts:
-            self.submit_to_exchange(
-                state, func=cancel_all, symbol="*"
-            )
+            self.submit_to_exchange(state, func=cancel_all, symbol="*")
             print(f"================================{self.user}")
             print(f"holdings - {state.portfolio.holdings()}")
             print(f"bv - {self.book_value}")

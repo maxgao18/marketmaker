@@ -5,7 +5,7 @@ import signal
 
 from asciimatics.screen import ManagedScreen
 
-from parsers.exchange_messages import book_topic, parse_book_str
+from utils.exchange_messages import book_topic, parse_book_str
 from visualizations.order_book.ascii_gui import ScreenState
 
 interrupted = False

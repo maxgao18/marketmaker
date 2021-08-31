@@ -35,6 +35,7 @@ class NoiseTrader(Trader):
         self._period = 1 / arrival_rate
         self._use_market = use_market
         self._next_submit = 0
+        self._cancel_old_orders_beyond_sec = 60
 
     def callback_options(self):
         return Trader.CallBackOptions(always_run=True)
@@ -47,6 +48,26 @@ class NoiseTrader(Trader):
 
     def run(self, state):
         ts = time.time()
+
+        old_orders = [
+            id
+            for id, o in state.portfolio.outstanding_orders(self._stock).items()
+            if ts - o["recv_time"] > self._cancel_old_orders_beyond_sec
+        ]
+        in_flight_cancels = []
+        for o in state.portfolio.in_flight_orders(self._stock).values():
+            otype = o["type"]
+            if otype == "CANCEL":
+                in_flight_cancels.append(o["order_id"])
+            elif otype == "CANCELALL" and isinstance(o["order_ids"], list):
+                in_flight_cancels += o["order_ids"]
+
+        to_cancel = set(old_orders).difference(in_flight_cancels)
+        if len(to_cancel) > 0:
+            self.submit_to_exchange(
+                state, func=cancel_all, order_ids=list(to_cancel), symbol=self._stock
+            )
+
         if self._next_submit < ts:
             print(f"================================{self.user}")
             print(f"holdings - {state.portfolio.holdings()}")

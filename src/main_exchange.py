@@ -40,7 +40,9 @@ def parse_message(msg):
         if order_type == "CANCEL":
             return Cancel(user=user, order_id=msg["order_id"], id=o_id, symbol=symbol)
         elif order_type == "CANCELALL":
-            return CancelAll(user=user, id=o_id, symbol=symbol)
+            return CancelAll(
+                user=user, id=o_id, order_ids=msg["order_ids"], symbol=symbol
+            )
         elif order_type == "MARKET":
             side = parse_side(msg["side"])
             if side is not None:

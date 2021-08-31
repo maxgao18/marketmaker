@@ -9,7 +9,7 @@ from collections import deque
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-from parsers.exchange_messages import event_topic
+from utils.exchange_messages import event_topic
 
 interrupted = False
 

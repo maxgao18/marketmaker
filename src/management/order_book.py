@@ -28,7 +28,7 @@ class OrderBooks:
     def __init__(self):
         self._books = {}
 
-    def process_exchange_book(self, symbol, book):
+    def process_exchange_books(self, symbol, book):
         self._books[symbol] = book
 
     def mid_px(self, symbol):

@@ -18,13 +18,13 @@ class Cancel(Order):
     def __init__(self, order_id, **kwargs):
         super().__init__(**kwargs)
         self.order_id = order_id
-        self.uorder_id = "{user}::{order_id}"
+        self.uorder_id = f"{self.user}::{order_id}"
 
 
 class CancelAll(Order):
-    def __init__(self, **kwargs):
+    def __init__(self, order_ids, **kwargs):
         super().__init__(**kwargs)
-        pass
+        self.order_ids = order_ids
 
 
 class Limit(Order):

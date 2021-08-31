@@ -14,6 +14,7 @@ class Trader(ABC):
         self.book_value = 0
         self.realized_pnl = 0
         self.unrealized_pnl = 0
+        self.signals = []
 
     def callback_options(self):
         return Trader.CallBackOptions()
@@ -50,3 +51,9 @@ class Trader(ABC):
     def set_pnls(self, state):
         self.book_value = sum(state.portfolio.book_values().values())
         self.realized_pnl = self.book_value - state.portfolio.initial_capital
+
+    def add_signal(self, signal):
+        if isinstance(signal, list):
+            self.signals += signal
+        else:
+            self.signals.append(signal)

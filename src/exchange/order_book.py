@@ -104,6 +104,20 @@ class OrderBook:
 
     def _exec_cancel_all(self, order):
         user = order.user
+        ids = order.order_ids
+        if isinstance(ids, list):
+            e = []
+            f = []
+            for oid in ids:
+                e1, f1 = self._exec_cancel(
+                    Cancel(
+                        order_id=oid, id=order.id, user=order.user, symbol=order.symbol
+                    )
+                )
+                e += e1
+                f += f1
+            return e, f
+
         canceled = []
         for book, side in [(self.buy_side, "BUY"), (self.sell_side, "SELL")]:
             for o in book:

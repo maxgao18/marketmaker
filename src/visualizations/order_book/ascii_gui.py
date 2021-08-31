@@ -11,6 +11,8 @@ BUY_COLOR = asciiconsts.COLOUR_BLUE
 _ASCII_X_START = 0
 _ASCII_Y_START = 4
 
+_MAX_STOCKS_LEN = 50
+
 
 class ScreenState:
     def __init__(self, screen, symbol):
@@ -59,6 +61,8 @@ def _write_book_to_screen(
         orderstr = (
             "".join(_format_order(o) for o in orders) if orders is not None else ""
         )
+        if len(orderstr) > _MAX_STOCKS_LEN:
+            orderstr = orderstr[:_MAX_STOCKS_LEN] + ">>>"
         return f"| {spcs}{px} | {_format_size(orders)} | {orderstr}"
 
     inverse_px_inc = 1 / px_inc

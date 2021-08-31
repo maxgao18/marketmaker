@@ -8,7 +8,7 @@ STOCK = "BABA"
 
 trader = NoiseTrader(
     user="mkt-odr",
-    arrival_rate=3,
+    arrival_rate=6,
     stock=STOCK,
     qty_mean=10,
     qty_stddev=5,

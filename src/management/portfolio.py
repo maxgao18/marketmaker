@@ -111,6 +111,7 @@ class Portfolio:
         symbol = event["symbol"]
         order_id = event["id"]
         self._outstanding_orders_by_symbol[symbol][order_id] = event
+        event["recv_time"] = time.time()
 
     def _process_cancel_event(self, event):
         symbol = event["symbol"]

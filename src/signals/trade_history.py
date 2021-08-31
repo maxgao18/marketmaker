@@ -2,15 +2,17 @@ import time
 
 from collections import deque, defaultdict
 
+from signals.signal import Signal
 
-class TradeHistory:
+
+class TradeHistory(Signal):
     def __init__(self, history_len_sec=10):
-        self._last_trade_prices = defaultdict(deque)
-        self._last_trade_ts = defaultdict(deque)
-        self._last_trade_volumes = defaultdict(deque)
+        self._prices = defaultdict(deque)
+        self._timestamps = defaultdict(deque)
+        self._volumes = defaultdict(deque)
         self._history_len_sec = history_len_sec
 
-    def process_exchange_events(self, events):
+    def process_exchange_events(self, symbol, events):
         ts = time.time()
         total_trade_amt = defaultdict(lambda: 0)
         total_trade_qty = defaultdict(lambda: 0)
@@ -22,9 +24,9 @@ class TradeHistory:
                 total_trade_qty[stock] += int(event["qty"])
         for s, amt in total_trade_amt.items():
             qty = total_trade_qty[s]
-            tss = self._last_trade_ts[s]
-            qtys = self._last_trade_volumes[s]
-            pxs = self._last_trade_prices[s]
+            tss = self._timestamps[s]
+            qtys = self._volumes[s]
+            pxs = self._prices[s]
             tss.append(ts)
             pxs.append(amt / qty)
             qtys.append(int(qty / 2))
@@ -34,19 +36,19 @@ class TradeHistory:
                 qtys.popleft()
                 pxs.popleft()
 
-    def last_trade_pxs(self, symbol):
-        return self._last_trade_prices[symbol]
+    def prices(self, symbol):
+        return self._prices[symbol]
 
-    def last_trade_tss(self, symbol):
-        return self._last_trade_ts[symbol]
+    def timestamps(self, symbol):
+        return self._timestamps[symbol]
 
-    def last_trade_volumes(self, symbol):
-        return self._last_trade_volumes[symbol]
+    def volumes(self, symbol):
+        return self._volumes[symbol]
 
-    def last_trade_px(self, symbol):
-        pxs = self._last_trade_prices.get(symbol)
+    def last_trade_price(self, symbol):
+        pxs = self._prices.get(symbol)
         return pxs[0] if pxs is not None and len(pxs) > 0 else None
 
     def last_trade_volume(self, symbol):
-        amts = self._last_trade_volumes.get(symbol)
+        amts = self._volumes.get(symbol)
         return amts[0] if amts is not None and len(amts) > 0 else None

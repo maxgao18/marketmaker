@@ -1,11 +1,10 @@
 import zmq
 
 from management.portfolio import Portfolio
-from management.trade_history import TradeHistory
 from management.order_book import OrderBooks
 from utils.exchange import Exchange
 from utils.state import State
-from parsers.exchange_messages import split_topic, parse_book_str, parse_event_str
+from utils.exchange_messages import split_topic, parse_book_str, parse_event_str
 
 
 class TradeLoop:
@@ -24,14 +23,12 @@ class TradeLoop:
 
         exchange = Exchange(self.exchange_addr)
         portfolio = Portfolio(self.trader.user)
-        trade_history = TradeHistory()
         order_book = OrderBooks()
 
         state = State(
             portfolio=portfolio,
             exchange=exchange,
             order_books=order_book,
-            trade_history=trade_history,
         )
 
         symbols = self.trader.symbols()
@@ -56,11 +53,14 @@ class TradeLoop:
 
                     if msg_type == "book":
                         books = parse_book_str(body)
-                        order_book.process_exchange_book(symbol, books)
+                        order_book.process_exchange_books(symbol, books)
+                        for s in self.trader.signals:
+                            s.process_exchange_books(symbol, books)
                     elif msg_type == "event":
                         events = parse_event_str(body)
                         portfolio.process_exchange_events(events)
-                        trade_history.process_exchange_events(events)
+                        for s in self.trader.signals:
+                            s.process_exchange_events(symbol, events)
                     else:
                         continue
 
