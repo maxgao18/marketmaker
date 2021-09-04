@@ -8,3 +8,15 @@ def idx_of_next_largest_backwards_search(lst, v):
         if lst[-i] <= v:
             return len(lst) + 1 - i
     return -1
+
+
+def largest_trade(events):
+    trades = [
+        (event["qty"], event["id"], event)
+        for event in events["executed"]
+        if event["type"] == "TRADE"
+    ]
+    if len(trades) == 0:
+        return None
+
+    return sorted(trades)[-1][2]

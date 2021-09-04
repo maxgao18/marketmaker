@@ -8,6 +8,8 @@ from management.order_manager import filter_order_ids
 from utils.exchange_messages import cancel_all, cancel, market, limit, Side
 from signals.trade_direction import TradeDirection
 from signals.vpin import VPIN
+from signals.weighted_bars import VolumeBars, DollarBars
+from signals.high_low_vol import HighLowVolatility
 
 import utils.algorithms as algos
 
@@ -58,12 +60,21 @@ class MarketMaker(Trader):
         self._refresh_period = 4
 
         self._last_print = 0
-
-        self._trade_direction = TradeDirection(history_len_sec=30)
-        self._vpin = VPIN(self._trade_direction)
         self._px_error_threshold = 0.01
 
-        self.add_signal([self._trade_direction, self._vpin])
+        self._trade_direction = TradeDirection(history_len_sec=60)
+        self._vpin = VPIN(self._trade_direction)
+        self._volume_bars = VolumeBars(thres=30, history_len_sec=300)
+        self._volatility_estimator = HighLowVolatility(self._volume_bars)
+
+        self.add_signal(
+            [
+                self._trade_direction,
+                self._vpin,
+                self._volume_bars,
+                self._volatility_estimator,
+            ]
+        )
 
     def callback_options(self):
         return Trader.CallBackOptions(always_run=False, on_event=True)
@@ -148,6 +159,14 @@ class MarketMaker(Trader):
                 print(f"bv - {state.portfolio.book_values()}")
                 print(f"theo - {new_theo:.4f}")
                 print(f"bid-ask {bid_px} - {ask_px}", flush=True)
+                print(
+                    f"vol per bar - {self._volatility_estimator.bar_volatility(self._stock):.4f}",
+                    flush=True,
+                )
+                print(
+                    f"ann vol - {self._volatility_estimator.annual_volatility(self._stock):.4f}",
+                    flush=True,
+                )
                 print(f"profit - ({self.realized_pnl:.2f})", flush=True)
 
                 self._last_print = ts

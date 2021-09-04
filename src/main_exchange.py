@@ -45,18 +45,24 @@ def parse_message(msg):
             )
         elif order_type == "MARKET":
             side = parse_side(msg["side"])
-            if side is not None:
+            qty = float(msg["qty"])
+            if np.round(qty) == qty and side is not None:
                 return Market(
-                    user=user, qty=int(msg["qty"]), side=side, id=o_id, symbol=symbol
+                    user=user, qty=int(qty), side=side, id=o_id, symbol=symbol
                 )
         elif order_type == "LIMIT":
             side = parse_side(msg["side"])
+            qty = float(msg["qty"])
             px = float(msg["px"])
-            if np.round(px, decimals=2) == px and side is not None:
+            if (
+                np.round(px, decimals=2) == px
+                and np.round(qty) == qty
+                and side is not None
+            ):
                 return Limit(
                     user=user,
-                    qty=int(msg["qty"]),
-                    px=float(msg["px"]),
+                    qty=int(qty),
+                    px=px,
                     side=side,
                     id=o_id,
                     symbol=symbol,
