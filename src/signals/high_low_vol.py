@@ -36,14 +36,14 @@ class HighLowVolatility(Signal):
         if seconds_per_period is not None:
             start_ts = bars[0].start_ts
             end_ts = bars[-1].end_ts
-            periods = (end_ts - start_ts) / seconds_per_period
+            scale = np.sqrt((end_ts - start_ts) * len(bars) / seconds_per_period)
         else:
-            periods = len(bars)
+            scale = len(bars)
 
-        if periods == 0:
+        if scale == 0:
             return None
         high_prices = np.array([bar.high for bar in bars])
         low_prices = np.array([bar.low for bar in bars])
         log_changes = np.log(high_prices / low_prices)
 
-        return (1 / periods) * sum(log_changes) / self._K_COEFF
+        return (1 / scale) * sum(log_changes) / self._K_COEFF

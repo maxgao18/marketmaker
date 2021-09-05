@@ -64,7 +64,7 @@ class MarketMaker(Trader):
 
         self._trade_direction = TradeDirection(history_len_sec=60)
         self._vpin = VPIN(self._trade_direction)
-        self._volume_bars = VolumeBars(thres=30, history_len_sec=300)
+        self._volume_bars = VolumeBars(thres=80, history_len_sec=300)
         self._volatility_estimator = HighLowVolatility(self._volume_bars)
 
         self.add_signal(
@@ -160,12 +160,10 @@ class MarketMaker(Trader):
                 print(f"theo - {new_theo:.4f}")
                 print(f"bid-ask {bid_px} - {ask_px}", flush=True)
                 print(
-                    f"vol per bar - {self._volatility_estimator.bar_volatility(self._stock):.4f}",
-                    flush=True,
+                    f"vol per bar % - {(self._volatility_estimator.bar_volatility(self._stock) or 0) * 100 }",
                 )
                 print(
-                    f"ann vol - {self._volatility_estimator.annual_volatility(self._stock):.4f}",
-                    flush=True,
+                    f"ann vol % - {(self._volatility_estimator.annual_volatility(self._stock) or 0) * 100 }",
                 )
                 print(f"profit - ({self.realized_pnl:.2f})", flush=True)
 

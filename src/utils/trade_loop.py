@@ -1,3 +1,4 @@
+import traceback
 import zmq
 
 from management.portfolio import Portfolio
@@ -70,4 +71,7 @@ class TradeLoop:
             if callback_options.always_run or (
                 saw_exchange_message and callback_options.on_event
             ):
-                self.trader.trade_loop(state)
+                try:
+                    self.trader.trade_loop(state)
+                except:
+                    traceback.print_exc()
