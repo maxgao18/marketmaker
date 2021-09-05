@@ -35,7 +35,7 @@ class Drift(Signal):
             end_ts = bars[-1].end_ts
             time_per_bar = (end_ts - start_ts) / len(bars)
             # I dont think this is right because AM != GM?
-            scale = time_per_bar / seconds_per_period
+            scale = time_per_bar * len(bars) / seconds_per_period
         else:
             scale = len(bars)
 
