@@ -1,11 +1,11 @@
 import math
 import numpy as np
 
+import utils.constants as constants
 from signals.signal import Signal
 
 
 class HighLowVolatility(Signal):
-    _SECONDS_PER_TRADING_YEAR = 60 * 60 * 24 * 253
     _K_COEFF = np.sqrt(8 / math.pi)
     """
     High low volatility estimator for price following geometric brownian motion.
@@ -23,7 +23,7 @@ class HighLowVolatility(Signal):
         if bars is None or len(bars) == 0:
             return None
 
-        return self._volatility(bars, self._SECONDS_PER_TRADING_YEAR)
+        return self._volatility(bars, constants.SECONDS_PER_TRADING_YEAR)
 
     def bar_volatility(self, symbol):
         bars = self._bars.bars(symbol)

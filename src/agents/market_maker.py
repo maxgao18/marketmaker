@@ -10,6 +10,7 @@ from signals.trade_direction import TradeDirection
 from signals.vpin import VPIN
 from signals.weighted_bars import VolumeBars, DollarBars
 from signals.high_low_vol import HighLowVolatility
+from signals.drift import Drift
 
 import utils.algorithms as algos
 
@@ -66,6 +67,7 @@ class MarketMaker(Trader):
         self._vpin = VPIN(self._trade_direction)
         self._volume_bars = VolumeBars(thres=80, history_len_sec=300)
         self._volatility_estimator = HighLowVolatility(self._volume_bars)
+        self._drift_estimator = Drift(self._volume_bars)
 
         self.add_signal(
             [
@@ -73,6 +75,7 @@ class MarketMaker(Trader):
                 self._vpin,
                 self._volume_bars,
                 self._volatility_estimator,
+                self._drift_estimator,
             ]
         )
 
@@ -163,7 +166,7 @@ class MarketMaker(Trader):
                     f"vol per bar % - {(self._volatility_estimator.bar_volatility(self._stock) or 0) * 100 }",
                 )
                 print(
-                    f"ann vol % - {(self._volatility_estimator.annual_volatility(self._stock) or 0) * 100 }",
+                    f"drift per bar % - {(self._drift_estimator.bar_drift(self._stock) or 0) * 100 }",
                 )
                 print(f"profit - ({self.realized_pnl:.2f})", flush=True)
 

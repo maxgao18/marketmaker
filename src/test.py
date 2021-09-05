@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 
 
 def check_volatility():
-    intervals = 100
+    intervals = 500
     vol = 0.5
-    drift = (0.15 - 0.5 * vol ** 2) * np.arange(0, intervals)
+    drift = (0 - 0.5 * vol ** 2) * np.arange(0, intervals)
     noise = np.random.normal(loc=0, scale=vol, size=intervals).cumsum()
     # print(noise)
     returns = np.exp(drift + noise)
@@ -17,7 +17,7 @@ def check_volatility():
     # plt.show()
 
     bars = []
-    for t in range(25):
+    for t in range(int(intervals / 4)):
         pxs = returns[t : t + 4]
         bars.append(
             Bar(
@@ -32,7 +32,7 @@ def check_volatility():
         )
     hl = HighLowVolatility(None)
     # print(bars)
-    print(f"Actual vol = {vol}, Estimated vol = {hl._volatility(1, bars)}")
+    print(f"Actual vol = {vol}, Estimated vol = {hl._volatility(bars, 1)}")
 
 
 if __name__ == "__main__":
