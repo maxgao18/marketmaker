@@ -65,7 +65,7 @@ class MarketMaker(Trader):
 
         self._trade_direction = TradeDirection(history_len_sec=60)
         self._vpin = VPIN(self._trade_direction)
-        self._volume_bars = VolumeBars(thres=80, history_len_sec=300)
+        self._volume_bars = VolumeBars(thres=50, history_len_sec=300)
         self._volatility_estimator = HighLowVolatility(self._volume_bars)
         self._drift_estimator = Drift(self._volume_bars)
 
@@ -118,8 +118,8 @@ class MarketMaker(Trader):
                             out_ask_qty += o["qty"]
 
             vpin = self._vpin.vpin(self._stock)
-            if vpin is None:
-                vpin = 0
+            bar_volatility = self._volatility_estimator.bar_volatility(self._stock) or 0
+            bar_drift = self._drift_estimator.bar_drift(self._stock) or 0
 
             half_spread_vpin = self._half_spread + vpin * self._vpin_multiplier
 
@@ -130,8 +130,14 @@ class MarketMaker(Trader):
             )
             additional_bid_edge = -additional_ask_edge if self._skew_quotes else 0
 
-            bid_px = np.round(new_theo - half_spread_vpin - additional_bid_edge, 2)
-            ask_px = np.round(new_theo + half_spread_vpin + additional_ask_edge, 2)
+            bid_px = new_theo - half_spread_vpin - additional_bid_edge
+            ask_px = new_theo + half_spread_vpin + additional_ask_edge
+
+            bid_px *= max(1, np.exp(bar_drift))
+            ask_px *= min(1, np.exp(bar_drift))
+
+            bid_px = np.round(bid_px, 2)
+            ask_px = np.round(ask_px, 2)
 
             to_cancel = filter_order_ids(
                 self._stock,
@@ -149,25 +155,36 @@ class MarketMaker(Trader):
                     symbol=self._stock,
                 )
 
-            bid_qty = self._max_position - stock_position - out_bid_qty
-            ask_qty = self._max_position + stock_position - out_ask_qty
+            max_bid_qty = (
+                min(1, 2 * self._vpin.buy_volume_pct(self._stock)) * self._max_position
+            )
+            max_ask_qty = (
+                min(1, 2 * self._vpin.sell_volume_pct(self._stock)) * self._max_position
+            )
+
+            bid_qty = max_bid_qty - stock_position - out_bid_qty
+            ask_qty = max_ask_qty + stock_position - out_ask_qty
+
+            # Scale quantities based on volume direction
+            bid_qty = int(bid_qty)
+            ask_qty = int(ask_qty)
 
             if ts - self._last_print > 0.5:
                 print(f"================================ {self.user}")
-                print(f"vpin {vpin:.4f}")
+                print(
+                    f"vpin {vpin * 100:.2f}%, buy pct {self._vpin.buy_volume_pct(self._stock) * 100:.2f}%"
+                )
                 print(
                     f"inital 1/2 sprd {self._half_spread:.02f}, with vpin {half_spread_vpin:.2f}"
                 )
                 print(f"holding - {state.portfolio.holdings()}")
                 print(f"bv - {state.portfolio.book_values()}")
                 print(f"theo - {new_theo:.4f}")
-                print(f"bid-ask {bid_px} - {ask_px}", flush=True)
                 print(
-                    f"vol per bar % - {(self._volatility_estimator.bar_volatility(self._stock) or 0) * 100 }",
+                    f"bid-ask {bid_px} @ max {int(max_bid_qty)} - {ask_px} @ max {int(max_ask_qty)}"
                 )
-                print(
-                    f"drift per bar % - {(self._drift_estimator.bar_drift(self._stock) or 0) * 100 }",
-                )
+                print(f"vol per bar % - {bar_volatility * 100 : .3f}")
+                print(f"drift per bar % - {bar_drift * 100 : .3f}")
                 print(f"profit - ({self.realized_pnl:.2f})", flush=True)
 
                 self._last_print = ts
